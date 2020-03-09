@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 enum T {
     START(Pattern.compile(""), true, new Idle()),
     OBJECT_BEGIN(Pattern.compile("\\{"), true, new CreateObject()),
-    OBJECT_END(Pattern.compile("}"), true, new SetValueIfExists()),
+    OBJECT_END(Pattern.compile("}"), true, new SetValueIfExistsAndNotArray()),
     ARRAY_BEGIN(Pattern.compile("\\["), true, new Push()),
     ARRAY_END(Pattern.compile("]"), true, new SetArrayValue()),
     VALUE_BEGIN(Pattern.compile("\""), false, new Push()),
@@ -14,7 +14,7 @@ enum T {
     VALUE_POINT(Pattern.compile("\\."), false, new Append()),
     VALUE_INT(Pattern.compile("[0-9]"), true, new Append()),
     VALUE_FLOAT(Pattern.compile("[0-9]"), true, new Append()),
-    VALUE_END(Pattern.compile("\""), true, new SetValueIfExists()), // think about arrays
+    VALUE_END(Pattern.compile("\""), true, new SetValueIfExistsAndNotArray()), // think about arrays
     KEY_BEGIN(Pattern.compile("\""), false, new Push()),
     KEY(Pattern.compile("[a-zA-Z0-9]"), false, new Append()),
     KEY_END(Pattern.compile("\""), true, new Idle()),

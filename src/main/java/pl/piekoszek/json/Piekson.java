@@ -1,6 +1,8 @@
 package pl.piekoszek.json;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.*;
 
 import static pl.piekoszek.json.T.*;
@@ -148,8 +150,7 @@ public class Piekson {
         try {
             instance = objectsClass.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
-            return null;
+            return new PieksonException(e);
         }
 
         for (Map.Entry<String, Object> entry : map.entrySet()) {
@@ -159,8 +160,47 @@ public class Piekson {
                 Field field = instance.getClass().getField(k);
                 if (v instanceof Map) {
                     setValue(instance, field, parseObject(field.getType(), (Map<String, Object>) v));
-                } else if (v instanceof Collection) {
-
+                } else if (field.getType().isArray()) {
+                    Object arrayToSet = Array.newInstance(field.getType().getComponentType(), Array.getLength(v));
+                    Object[] arr = (Object[]) v;
+                    Class<?> type = field.getType().getComponentType();
+                    for (int i = 0; i < arr.length; i++) {
+                        if (type == int.class) {
+                            Array.setInt(arrayToSet, i, (int) arr[i]);
+                        } else if (type == long.class) {
+                            Array.setLong(arrayToSet, i, (long) arr[i]);
+                        } else if (type == double.class) {
+                            Array.setDouble(arrayToSet, i, (double) arr[i]);
+                        } else if (type == float.class) {
+                            Array.setFloat(arrayToSet, i, ((Double) arr[i]).floatValue());
+                        } else if (type == boolean.class) {
+                            Array.setBoolean(arrayToSet, i, (boolean) arr[i]);
+                        } else if (type == Integer.class) {
+                            Array.set(arrayToSet, i, ((Long) arr[i]).intValue());
+                        } else if (type == Long.class) {
+                            Array.set(arrayToSet, i, arr[i]);
+                        } else if (type == Double.class) {
+                            Array.set(arrayToSet, i, arr[i]);
+                        } else if (type == Float.class) {
+                            Array.set(arrayToSet, i, ((Double) arr[i]).floatValue());
+                        } else if (type == Boolean.class) {
+                            Array.set(arrayToSet, i, arr[i]);
+                        } else if (v instanceof HashMap[]) {
+                            Array.set(arrayToSet, i, parseObject(field.getType().getComponentType(), (Map<String, Object>) arr[i]));
+                        }
+                    }
+                    setValue(instance, field, arrayToSet);
+                } else if (Collection.class.isAssignableFrom(field.getType())) {
+                    Map<String, Object>[] arr = (Map<String, Object>[]) v;
+                    List collectionToSet = new ArrayList();
+                    for (int i = 0; i < arr.length; i++) {
+                        collectionToSet.add(parseObject((Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0], arr[i]));
+                    }
+                    if (field.getType() == Set.class) {
+                        setValue(instance, field, new HashSet(collectionToSet));
+                    } else if (field.getType() == List.class) {
+                        setValue(instance, field, collectionToSet);
+                    }
                 } else {
                     setValue(instance, field, v);
                 }

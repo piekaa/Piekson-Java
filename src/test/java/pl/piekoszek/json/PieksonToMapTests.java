@@ -87,6 +87,31 @@ class PieksonToMapTests {
     }
 
     @Test
+    void testObjectInArray() {
+        //language=JSON
+        String json = "{\n" +
+                "  \"a\": [\n" +
+                "    {\n" +
+                "      \"abc\": true\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"abc\": false\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"abc\": true\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"abc\": false\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        Map<String, Object> result = Piekson.fromJson(json);
+        Map[] array = (Map[]) result.get("a");
+        assertEquals(4, array.length);
+    }
+
+    @Test
     void testBoolean() {
         //language=JSON
         String json = "{\n" +
