@@ -13,4 +13,12 @@ class X {
         this.t = t;
         this.value = "" + c;
     }
+
+    @Override
+    public String toString() {
+        return "X{" +
+                "t=" + t +
+                ", value='" + value + '\'' +
+                '}';
+    }
 }
