@@ -316,7 +316,7 @@ public class Piekson {
                         .findFirst()
                         .orElse(null);
                 if (nt == null) {
-                    throw new PieksonException("Error parsing json at " + json.substring(0, i) + " expected any of " + Arrays.toString(tt.get(t)));
+                    throw new PieksonException("Error parsing json at " + json.substring(0, i) + " index: " + i + " expected any of " + Arrays.toString(tt.get(t)));
                 }
             }
 
