@@ -205,7 +205,7 @@ public class Piekson {
                     setValue(instance, field, v);
                 }
             } catch (NoSuchFieldException e) {
-                e.printStackTrace();
+                // it's ok
             }
         }
         return instance;
@@ -227,7 +227,7 @@ public class Piekson {
                 field.set(object, value);
             }
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            throw new PieksonException(e);
         }
     }
 
