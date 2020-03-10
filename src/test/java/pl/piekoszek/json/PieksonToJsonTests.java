@@ -43,4 +43,11 @@ class PieksonToJsonTests {
 
         assertEquals(expected, result);
     }
+
+    @Test
+    void testStringToJson() {
+        String s = "dupa kościotrupa";
+
+        assertEquals("\"" + s + "\"", Piekson.toJson(s));
+    }
 }

@@ -28,7 +28,7 @@ abstract class StackFunction {
         } else if (value.t == T.OBJECT_BEGIN) {
             return mapStack.pop();
         }
-        return null;
+        return value.value;
     }
 
 }
@@ -89,6 +89,10 @@ class SetIfNotArray extends StackFunction {
     @Override
     public void handle(ArrayList<X> stack, Stack<Map<String, Object>> mapStack, T t, char c) {
 
+        if (stack.size() < 2) {
+            return;
+        }
+
         X key = stack.get(stack.size() - 2);
         X value = stack.get(stack.size() - 1);
 
@@ -105,7 +109,7 @@ class SetArrayValue extends StackFunction {
     @Override
     void handle(ArrayList<X> stack, Stack<Map<String, Object>> mapStack, T t, char c) {
         List<Object> array = new ArrayList<>();
-        Class valueClass = Object.class;
+        Class<?> valueClass = Object.class;
         while (stack.get(stack.size() - 1).t != T.ARRAY_BEGIN) {
             X value = stack.get(stack.size() - 1);
             Object decodedValue = decodeValue(value, mapStack);

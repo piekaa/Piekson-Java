@@ -49,14 +49,24 @@ public class Piekson {
         tt.put(VALUE_BEGIN, new T[]{
                 VALUE
         });
+        tt.put(ARRAY_VALUE_BEGIN, new T[]{
+                ARRAY_VALUE
+        });
         tt.put(VALUE, new T[]{
                 VALUE,
                 VALUE_END
         });
+        tt.put(ARRAY_VALUE, new T[]{
+                ARRAY_VALUE,
+                ARRAY_VALUE_END
+        });
         tt.put(VALUE_END, new T[]{
                 OBJECT_END,
-                ARRAY_END,
                 VALUES_SEPARATOR,
+        });
+        tt.put(ARRAY_VALUE_END, new T[]{
+                ARRAY_END,
+                ARRAY_VALUES_SEPARATOR,
         });
         tt.put(VALUE_INT_FIRST, new T[]{
                 VALUE_INT,
@@ -89,8 +99,15 @@ public class Piekson {
                 OBJECT_BEGIN,
                 ARRAY_BEGIN
         });
+        tt.put(ARRAY_VALUES_SEPARATOR, new T[]{
+                ARRAY_VALUE_BEGIN,
+                VALUE_INT_FIRST,
+                VALUE_BOOLEAN_FIRST,
+                OBJECT_BEGIN,
+                ARRAY_BEGIN
+        });
         tt.put(ARRAY_BEGIN, new T[]{
-                VALUE_BEGIN,
+                ARRAY_VALUE_BEGIN,
                 VALUE_INT_FIRST,
                 VALUE_BOOLEAN_FIRST,
                 OBJECT_BEGIN,
@@ -141,7 +158,19 @@ public class Piekson {
             return (T) parseObject(type, (Map<String, Object>) result);
         }
 
-        return null;
+        if (result instanceof Long && type.isAssignableFrom(Integer.class)) {
+            return (T) (Integer) ((Number) result).intValue();
+        }
+
+        if (result instanceof Double && type.isAssignableFrom(Float.class)) {
+            return (T) (Float) ((Number) result).floatValue();
+        }
+
+        if (result.getClass().isArray()) {
+            return (T) createArray(type.getComponentType(), result);
+        }
+
+        return (T) result;
     }
 
     private static Object parseObject(Class objectsClass, Map<String, Object> map) {
@@ -161,35 +190,7 @@ public class Piekson {
                 if (v instanceof Map) {
                     setValue(instance, field, parseObject(field.getType(), (Map<String, Object>) v));
                 } else if (field.getType().isArray()) {
-                    Object arrayToSet = Array.newInstance(field.getType().getComponentType(), Array.getLength(v));
-                    Object[] arr = (Object[]) v;
-                    Class<?> type = field.getType().getComponentType();
-                    for (int i = 0; i < arr.length; i++) {
-                        if (type == int.class) {
-                            Array.setInt(arrayToSet, i, (int) arr[i]);
-                        } else if (type == long.class) {
-                            Array.setLong(arrayToSet, i, (long) arr[i]);
-                        } else if (type == double.class) {
-                            Array.setDouble(arrayToSet, i, (double) arr[i]);
-                        } else if (type == float.class) {
-                            Array.setFloat(arrayToSet, i, ((Double) arr[i]).floatValue());
-                        } else if (type == boolean.class) {
-                            Array.setBoolean(arrayToSet, i, (boolean) arr[i]);
-                        } else if (type == Integer.class) {
-                            Array.set(arrayToSet, i, ((Long) arr[i]).intValue());
-                        } else if (type == Long.class) {
-                            Array.set(arrayToSet, i, arr[i]);
-                        } else if (type == Double.class) {
-                            Array.set(arrayToSet, i, arr[i]);
-                        } else if (type == Float.class) {
-                            Array.set(arrayToSet, i, ((Double) arr[i]).floatValue());
-                        } else if (type == Boolean.class) {
-                            Array.set(arrayToSet, i, arr[i]);
-                        } else if (v instanceof HashMap[]) {
-                            Array.set(arrayToSet, i, parseObject(field.getType().getComponentType(), (Map<String, Object>) arr[i]));
-                        }
-                    }
-                    setValue(instance, field, arrayToSet);
+                    setValue(instance, field, createArray(field.getType().getComponentType(), v));
                 } else if (Collection.class.isAssignableFrom(field.getType())) {
                     Map<String, Object>[] arr = (Map<String, Object>[]) v;
                     List collectionToSet = new ArrayList();
@@ -210,6 +211,40 @@ public class Piekson {
         }
         return instance;
     }
+
+    static Object createArray(Class<?> componentType, Object array) {
+        Object arrayToSet = Array.newInstance(componentType, Array.getLength(array));
+        Object[] arr = (Object[]) array;
+        for (int i = 0; i < arr.length; i++) {
+            if (componentType == int.class) {
+                Array.setInt(arrayToSet, i, ((Number) arr[i]).intValue());
+            } else if (componentType == long.class) {
+                Array.setLong(arrayToSet, i, (long) arr[i]);
+            } else if (componentType == double.class) {
+                Array.setDouble(arrayToSet, i, (double) arr[i]);
+            } else if (componentType == float.class) {
+                Array.setFloat(arrayToSet, i, ((Number) arr[i]).floatValue());
+            } else if (componentType == boolean.class) {
+                Array.setBoolean(arrayToSet, i, (boolean) arr[i]);
+            } else if (componentType == Integer.class) {
+                Array.set(arrayToSet, i, ((Long) arr[i]).intValue());
+            } else if (componentType == Long.class) {
+                Array.set(arrayToSet, i, arr[i]);
+            } else if (componentType == Double.class) {
+                Array.set(arrayToSet, i, arr[i]);
+            } else if (componentType == Float.class) {
+                Array.set(arrayToSet, i, ((Double) arr[i]).floatValue());
+            } else if (componentType == Boolean.class) {
+                Array.set(arrayToSet, i, arr[i]);
+            } else if (array instanceof HashMap[]) {
+                Array.set(arrayToSet, i, parseObject(componentType, (Map<String, Object>) arr[i]));
+            } else {
+                Array.set(arrayToSet, i, arr[i]);
+            }
+        }
+        return arrayToSet;
+    }
+
 
     private static void setValue(Object object, Field field, Object value) {
         try {
@@ -247,15 +282,29 @@ public class Piekson {
             }
             T nt = Arrays.stream(tt.get(t)).filter(e -> e.p.matcher("" + c).matches())
                     .findFirst()
-                    .orElseThrow(PieksonException::new);
+                    .orElse(null);
+            if (nt == null) {
+                throw new PieksonException("Error parsing json at " + json.substring(0, i) + " expected any of " + Arrays.toString(tt.get(t)));
+            }
+
             nt.stackFunction.handle(stack, mapStack, nt, c);
+
             t = nt;
+        }
+
+        if (!stack.isEmpty()) {
+            new SetValueIfExistsAndNotArray().handle(stack, mapStack, stack.get(stack.size() - 1).t, ' ');
         }
 
         return mapStack.peek().get("v");
     }
 
     public static String toJson(Object object) {
+
+        if (object instanceof Number || object instanceof Boolean || object instanceof String) {
+            return encodeValue(object);
+        }
+
         Field[] fields = object.getClass().getFields();
         StringBuilder result = new StringBuilder("{");
         try {
