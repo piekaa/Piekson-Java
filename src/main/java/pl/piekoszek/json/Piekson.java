@@ -240,11 +240,8 @@ public class Piekson {
         stack.add(new X(KEY_BEGIN, 'v'));
         mapStack.push(new HashMap<>());
 
-        System.out.println(json);
-
         for (int i = 0; i < json.length(); i++) {
             char c = json.charAt(i);
-            System.out.print(c);
             if (t.skipBlank && Character.isWhitespace(c)) {
                 continue;
             }
@@ -254,8 +251,6 @@ public class Piekson {
             nt.stackFunction.handle(stack, mapStack, nt, c);
             t = nt;
         }
-
-        System.out.println(stack);
 
         return mapStack.peek().get("v");
     }
