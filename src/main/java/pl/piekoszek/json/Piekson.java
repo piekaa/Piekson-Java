@@ -260,4 +260,50 @@ public class Piekson {
         return mapStack.peek().get("v");
     }
 
+    public static String toJson(Object object) {
+        Field[] fields = object.getClass().getFields();
+        StringBuilder result = new StringBuilder("{");
+        try {
+            for (Field field : fields) {
+                Object value = field.get(object);
+                if (value != null) {
+                    result.append(result.length() > 1 ? "," : "");
+                    result.append("\"").append(field.getName()).append("\":");
+                    if (value.getClass().isArray()) {
+                        result.append("[");
+                        for (int i = 0; i < Array.getLength(value); i++) {
+                            result.append(i > 0 ? "," : "");
+                            result.append(encodeValue(Array.get(value, i)));
+                        }
+                        result.append("]");
+                    } else if (value instanceof Collection) {
+                        result.append("[");
+                        int i = 0;
+                        for (Object item : (Collection) value) {
+                            result.append(i > 0 ? "," : "");
+                            result.append(encodeValue(item));
+                            i++;
+                        }
+                        result.append("]");
+                    } else {
+                        result.append(encodeValue(value));
+                    }
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new PieksonException(e);
+        }
+        return result + "}";
+    }
+
+    private static String encodeValue(Object value) {
+        if (value instanceof Number || value instanceof Boolean) {
+            return value.toString();
+        } else if (value instanceof String) {
+            return ("\"") + (value) + ("\"");
+        } else {
+            return toJson(value);
+        }
+    }
+
 }
