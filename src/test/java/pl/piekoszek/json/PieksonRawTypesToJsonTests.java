@@ -13,6 +13,11 @@ class PieksonRawTypesToJsonTests {
     }
 
     @Test
+    void testStringEscaped() {
+        assertEquals("dupa ko \"ś\" ciotrupa", Piekson.fromJson("\"dupa ko \\\"ś\\\" ciotrupa\"", String.class));
+    }
+
+    @Test
     void testInt() {
         assertEquals(123, Piekson.fromJson("123", Integer.class));
     }

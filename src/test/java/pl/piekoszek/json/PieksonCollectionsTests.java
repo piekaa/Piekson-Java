@@ -2,7 +2,11 @@ package pl.piekoszek.json;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PieksonCollectionsTests {
 
@@ -32,6 +36,18 @@ class PieksonCollectionsTests {
         String json = "[\"abc\", \"def\", \"gh1\"" +
                 "]";
         assertArrayEquals(new String[]{"abc", "def", "gh1"}, Piekson.fromJson(json, String[].class));
+    }
+
+    @Test
+    void testListOfStrings() {
+        //language=JSON
+        String json = "[\"abc\", \"def\", \"gh1\"" +
+                "]";
+        List<String> list = new LinkedList<>();
+        list.add("abc");
+        list.add("def");
+        list.add("gh1");
+        assertEquals(list, Piekson.fromJson(json, List.class, String.class));
     }
 
     @Test

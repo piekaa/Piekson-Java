@@ -50,4 +50,14 @@ class PieksonToJsonTests {
 
         assertEquals("\"" + s + "\"", Piekson.toJson(s));
     }
+
+    @Test
+    void testEscapedStringToJson() {
+        String s = "dupa ko \"ś\" ciotrupa";
+
+        //language=JSON
+        String expectedJson = "\"dupa ko \\\"ś\\\" ciotrupa\"";
+
+        assertEquals(expectedJson, Piekson.toJson(s));
+    }
 }

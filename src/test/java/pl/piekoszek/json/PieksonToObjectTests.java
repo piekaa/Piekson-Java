@@ -87,6 +87,11 @@ class PieksonToObjectTests {
                 "    {\n" +
                 "      \"ab\": false\n" +
                 "    }\n" +
+                "  ],\n" +
+                "  \"ss\": [\n" +
+                "    \"abc\",\n" +
+                "    \"cba\",\n" +
+                "    \"eee\"\n" +
                 "  ]\n" +
                 "}";
         TestClass expected = new TestClass();
@@ -109,6 +114,12 @@ class PieksonToObjectTests {
         set.add(new TestNested(true));
         set.add(new TestNested(false));
         expected.nestedSet = set;
+        List<String> ss = new LinkedList<>();
+        ss.add("abc");
+        ss.add("cba");
+        ss.add("eee");
+        expected.ss = ss;
+
         assertEquals(expected, Piekson.fromJson(json, TestClass.class));
     }
 
@@ -123,6 +134,7 @@ class TestClass {
     public Long[] gg;
     public float[] h;
     public Float[] hh;
+    public List<String> ss;
     public TestNested nested;
     public TestNested[] nesteds;
     public List<TestNested> nestedList;
@@ -140,6 +152,7 @@ class TestClass {
                 Arrays.equals(gg, testClass.gg) &&
                 Arrays.equals(h, testClass.h) &&
                 Arrays.equals(hh, testClass.hh) &&
+                Objects.equals(ss, testClass.ss) &&
                 Objects.equals(nested, testClass.nested) &&
                 Arrays.equals(nesteds, testClass.nesteds) &&
                 Objects.equals(nestedList, testClass.nestedList) &&
@@ -148,7 +161,7 @@ class TestClass {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(a, b, c, nested, nestedList, nestedSet);
+        int result = Objects.hash(a, b, c, ss, nested, nestedList, nestedSet);
         result = 31 * result + Arrays.hashCode(g);
         result = 31 * result + Arrays.hashCode(gg);
         result = 31 * result + Arrays.hashCode(h);
@@ -167,6 +180,7 @@ class TestClass {
                 ", gg=" + Arrays.toString(gg) +
                 ", h=" + Arrays.toString(h) +
                 ", hh=" + Arrays.toString(hh) +
+                ", ss=" + ss +
                 ", nested=" + nested +
                 ", nesteds=" + Arrays.toString(nesteds) +
                 ", nestedList=" + nestedList +
