@@ -341,8 +341,17 @@ public class Piekson {
             return encodeValue(object);
         }
 
+        if (object instanceof Collection) {
+            return encodeCollection((Collection)object);
+        }
+
+        if( object.getClass().isArray()) {
+            return encodeArray(object);
+        }
+
         Field[] fields = object.getClass().getFields();
         StringBuilder result = new StringBuilder("{");
+
         try {
             for (Field field : fields) {
                 Object value = field.get(object);
@@ -350,21 +359,9 @@ public class Piekson {
                     result.append(result.length() > 1 ? "," : "");
                     result.append("\"").append(field.getName()).append("\":");
                     if (value.getClass().isArray()) {
-                        result.append("[");
-                        for (int i = 0; i < Array.getLength(value); i++) {
-                            result.append(i > 0 ? "," : "");
-                            result.append(encodeValue(Array.get(value, i)));
-                        }
-                        result.append("]");
+                        result.append(encodeArray(value));
                     } else if (value instanceof Collection) {
-                        result.append("[");
-                        int i = 0;
-                        for (Object item : (Collection) value) {
-                            result.append(i > 0 ? "," : "");
-                            result.append(encodeValue(item));
-                            i++;
-                        }
-                        result.append("]");
+                        result.append(encodeCollection((Collection)value));
                     } else {
                         result.append(encodeValue(value));
                     }
@@ -374,6 +371,30 @@ public class Piekson {
             throw new PieksonException(e);
         }
         return result + "}";
+    }
+
+    private static String encodeCollection(Collection collection) {
+        StringBuilder result = new StringBuilder();
+        result.append("[");
+        int i = 0;
+        for (Object item : (Collection) collection) {
+            result.append(i > 0 ? "," : "");
+            result.append(encodeValue(item));
+            i++;
+        }
+        result.append("]");
+        return result.toString();
+    }
+
+    private static String encodeArray(Object array) {
+        StringBuilder result = new StringBuilder();
+        result.append("[");
+        for (int i = 0; i < Array.getLength(array); i++) {
+            result.append(i > 0 ? "," : "");
+            result.append(encodeValue(Array.get(array, i)));
+        }
+        result.append("]");
+        return result.toString();
     }
 
     public static byte[] toBson(Map<String, Object> map) {

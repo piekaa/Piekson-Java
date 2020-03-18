@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PieksonToJsonTests {
@@ -59,5 +60,23 @@ class PieksonToJsonTests {
         String expectedJson = "\"dupa ko \\\"ś\\\" ciotrupa\"";
 
         assertEquals(expectedJson, Piekson.toJson(s));
+    }
+
+    @Test
+    void testListToJson() {
+        List<String> list = new ArrayList<>();
+        list.add("abc");
+        list.add("edf");
+        //language=JSON
+        String expectedJson = "[\"abc\",\"edf\"]";
+        assertEquals(expectedJson, Piekson.toJson(list));
+    }
+
+    @Test
+    void testArrayToJson() {
+        String[] array = new String[] {"abc", "edf"};
+        //language=JSON
+        String expectedJson = "[\"abc\",\"edf\"]";
+        assertEquals(expectedJson, Piekson.toJson(array));
     }
 }
