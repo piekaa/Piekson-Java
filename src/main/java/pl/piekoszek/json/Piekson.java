@@ -1,6 +1,6 @@
 package pl.piekoszek.json;
 
-import pl.piekoszek.backend.collections.ByteReader;
+import pl.piekoszek.collections.ByteReader;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;

@@ -1,7 +1,5 @@
-package pl.piekoszek.backend.collections;
+package pl.piekoszek.collections;
 
-
-import pl.piekoszek.collections.ByteBuffer;
 
 /**
  * Little endian

@@ -1,6 +1,6 @@
 package pl.piekoszek.storage.mongo;
 
-import pl.piekoszek.backend.collections.ByteReader;
+import pl.piekoszek.collections.ByteReader;
 import pl.piekoszek.collections.ByteBuffer;
 import pl.piekoszek.json.Piekson;
 import pl.piekoszek.json.UnsupportedElementType;
