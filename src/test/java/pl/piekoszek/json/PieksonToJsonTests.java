@@ -2,12 +2,8 @@ package pl.piekoszek.json;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PieksonToJsonTests {
@@ -74,9 +70,25 @@ class PieksonToJsonTests {
 
     @Test
     void testArrayToJson() {
-        String[] array = new String[] {"abc", "edf"};
+        String[] array = new String[]{"abc", "edf"};
         //language=JSON
         String expectedJson = "[\"abc\",\"edf\"]";
         assertEquals(expectedJson, Piekson.toJson(array));
+    }
+
+    @Test
+    void testMapToJson() {
+
+        Map<String, Object> map = new LinkedHashMap<>();
+        Map<String, Object> inner = new LinkedHashMap<>();
+        map.put("text", "dupa kosciotrupa");
+        map.put("number", 123);
+        inner.put("dbl", 123.12);
+
+        map.put("obj", inner);
+
+        //language=JSON
+        String expectedJson = "{\"text\":\"dupa kosciotrupa\",\"number\":123,\"obj\":{\"dbl\":123.12}}";
+        assertEquals(expectedJson, Piekson.toJson(map));
     }
 }
